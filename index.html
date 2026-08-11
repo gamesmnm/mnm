@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>5 лет МНМ: игра на миллион смыслов</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#04100f;
+    --bg-mid:#123a39;
+    --bg-glow:#2c6669;
+    --blue-1:#164e4d;   /* панель — светлая бирюза */
+    --blue-2:#0a2b2b;   /* панель — тёмная бирюза */
+    --gold-1:#b8f0f1;   /* акцент — светлый циан */
+    --gold-2:#63c3c5;   /* акцент — фирменная бирюза */
+    --gold-3:#2f8f92;   /* акцент — глубокая бирюза */
+    --white:#eaf6f6;
+    --green:#1ea34a;
+    --green-d:#0d6b2c;
+    --red:#c62234;
+    --red-d:#7d1420;
+    --accent-rgb:99,195,197;
+  }
+
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Montserrat',sans-serif;
+    color:var(--white);
+    background:
+      radial-gradient(120% 90% at 50% 8%, var(--bg-glow) 0%, var(--bg-mid) 34%, var(--bg-deep) 78%);
+    overflow:hidden;
+    position:fixed;
+    inset:0;
+  }
+
+  /* атмосферный «прожектор» */
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background:
+      radial-gradient(60% 50% at 50% 0%, rgba(99,195,197,.22), transparent 70%),
+      radial-gradient(45% 55% at 12% 100%, rgba(60,150,150,.16), transparent 70%),
+      radial-gradient(45% 55% at 88% 100%, rgba(60,150,150,.16), transparent 70%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* точечная волна из айдентики МНМ */
+  body::after{
+    content:"";
+    position:fixed; left:0; right:0; bottom:0; height:42%;
+    background-image:radial-gradient(rgba(120,220,220,.5) 1px, transparent 1.4px);
+    background-size:15px 15px;
+    -webkit-mask-image:radial-gradient(120% 100% at 50% 140%, #000 40%, transparent 72%);
+    mask-image:radial-gradient(120% 100% at 50% 140%, #000 40%, transparent 72%);
+    opacity:.4; pointer-events:none; z-index:0;
+  }
+
+  .screen{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    padding:24px 18px calc(24px + env(safe-area-inset-bottom));
+    z-index:1;
+    opacity:0; visibility:hidden;
+    transition:opacity .45s ease;
+  }
+  .screen.active{opacity:1; visibility:visible}
+
+  /* ---------- ЗАСТАВКА ---------- */
+  .brand{
+    text-align:center;
+    display:flex; flex-direction:column; align-items:center;
+    gap:6px;
+    animation:rise .8s ease both;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+
+  .brand .kicker{
+    font-family:'Oswald',sans-serif;
+    letter-spacing:.42em;
+    font-weight:500;
+    font-size:clamp(11px,3.4vw,15px);
+    color:var(--gold-2);
+    text-transform:uppercase;
+    padding-left:.42em;
+  }
+
+  .brand h1{
+    font-family:'Oswald',sans-serif;
+    font-weight:700;
+    line-height:.96;
+    text-transform:uppercase;
+    font-size:clamp(34px,10vw,76px);
+    background:linear-gradient(180deg,#fff 0%,var(--gold-1) 30%,var(--gold-2) 62%,var(--gold-3) 100%);
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 4px 20px rgba(99,195,197,.45));
+    margin:2px 0;
+  }
+  .brand .sub{
+    font-family:'Oswald',sans-serif;
+    font-weight:400;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    font-size:clamp(15px,4.6vw,26px);
+    color:var(--white);
+    opacity:.9;
+  }
+  .brand .tagline{
+    margin-top:12px;
+    display:flex; align-items:center; gap:12px;
+    font-family:'Oswald',sans-serif; font-weight:400;
+    letter-spacing:.08em;
+    font-size:clamp(13px,3.8vw,18px);
+    color:var(--gold-2);
+    white-space:nowrap;
+  }
+  .brand .tagline::before,
+  .brand .tagline::after{
+    content:""; width:clamp(18px,7vw,40px); height:1px;
+    background:linear-gradient(90deg,transparent,var(--gold-3));
+  }
+  .brand .tagline::after{transform:scaleX(-1)}
+
+  /* золотая эмблема-кольцо над логотипом */
+  .emblem{
+    width:clamp(70px,20vw,110px); height:clamp(70px,20vw,110px);
+    border-radius:50%;
+    display:grid; place-items:center;
+    margin-bottom:10px;
+    background:
+      radial-gradient(circle at 50% 35%, rgba(184,240,241,.28), transparent 60%),
+      conic-gradient(from 220deg, var(--gold-3), var(--gold-1), var(--gold-2), var(--gold-3));
+    box-shadow:0 0 0 4px rgba(4,16,15,.6), 0 0 34px rgba(99,195,197,.55), inset 0 0 18px rgba(0,0,0,.35);
+    animation:spinGlow 6s linear infinite;
+  }
+  @keyframes spinGlow{to{filter:hue-rotate(-6deg)}}
+  .emblem span{
+    font-family:'Oswald',sans-serif; font-weight:700;
+    font-size:clamp(30px,9vw,52px);
+    color:#062020;
+    text-shadow:0 1px 1px rgba(255,255,255,.4);
+  }
+
+  /* пиксельный знак-логотип МНМ */
+  .mark{
+    width:clamp(56px,15vw,84px); height:auto; margin-bottom:16px;
+    filter:drop-shadow(0 0 18px rgba(99,195,197,.55));
+    animation:rise .8s ease both;
+  }
+  .mark rect{width:12px;height:12px;fill:#ffffff}
+
+  /* золотая кнопка */
+  .btn-gold{
+    margin-top:34px;
+    font-family:'Oswald',sans-serif; font-weight:600;
+    text-transform:uppercase; letter-spacing:.12em;
+    font-size:clamp(16px,4.6vw,22px);
+    color:#062020;
+    padding:16px 44px;
+    border:none; cursor:pointer;
+    border-radius:60px;
+    background:linear-gradient(180deg,var(--gold-1),var(--gold-2) 55%,var(--gold-3));
+    box-shadow:0 8px 26px rgba(99,195,197,.4), inset 0 1px 2px rgba(255,255,255,.5);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-gold:active{transform:translateY(2px) scale(.98)}
+  .btn-gold.pulse{animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{
+    0%,100%{box-shadow:0 8px 26px rgba(99,195,197,.4), inset 0 1px 2px rgba(255,255,255,.5)}
+    50%{box-shadow:0 8px 40px rgba(99,195,197,.8), inset 0 1px 2px rgba(255,255,255,.5)}
+  }
+
+  .hint{
+    margin-top:26px; max-width:340px; text-align:center;
+    font-size:13px; line-height:1.6; color:rgba(238,243,255,.6);
+  }
+
+  /* ---------- ИГРОВОЙ ЭКРАН ---------- */
+  #game{justify-content:flex-start; gap:12px; overflow-y:auto; overflow-x:hidden}
+
+  .topbar{
+    width:100%; max-width:640px;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:10px;
+  }
+  .q-index{
+    font-family:'Oswald',sans-serif; font-weight:600;
+    font-size:14px; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--gold-2);
+  }
+  .progress{ display:flex; gap:7px; align-items:center }
+  .dot{
+    width:9px; height:9px; border-radius:50%;
+    background:rgba(255,255,255,.16);
+    transition:background .3s, transform .3s;
+  }
+  .dot.done{ background:var(--gold-2) }
+  .dot.active{
+    background:var(--gold-1); transform:scale(1.4);
+    box-shadow:0 0 10px rgba(99,195,197,.8);
+  }
+
+  /* линии помощи */
+  .lifelines{
+    display:flex; gap:12px; justify-content:center; margin:14px 0 4px;
+  }
+  .lifeline{
+    width:60px;height:44px;border-radius:26px;
+    display:grid;place-items:center;cursor:pointer;
+    font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;
+    color:var(--white);
+    background:linear-gradient(180deg,var(--blue-1),var(--blue-2));
+    border:2px solid var(--gold-2);
+    box-shadow:0 3px 12px rgba(0,0,0,.4), inset 0 1px 3px rgba(120,220,220,.3);
+    transition:transform .15s, opacity .2s;
+    position:relative;
+  }
+  .lifeline svg{width:26px;height:26px;fill:none;stroke:var(--gold-1);stroke-width:2}
+  .lifeline:active{transform:scale(.94)}
+  .lifeline.used{opacity:.35; pointer-events:none}
+  .lifeline.used::after{
+    content:"";position:absolute;left:8px;right:8px;top:50%;height:2px;
+    background:var(--red);transform:rotate(-18deg);border-radius:2px;
+  }
+
+  /* область вопроса */
+  .qwrap{
+    width:100%; max-width:640px;
+    display:flex; flex-direction:column; gap:14px;
+    margin-top:auto; margin-bottom:auto;
+  }
+  .q-audio{
+    align-self:center; cursor:pointer; user-select:none;
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+  }
+  .q-audio-img{
+    width:clamp(150px,42vw,230px); height:auto; display:block;
+    filter:drop-shadow(0 10px 24px rgba(0,0,0,.5));
+    transition:transform .2s ease;
+  }
+  .q-audio:active .q-audio-img{ transform:scale(.97) }
+  .q-audio.playing .q-audio-img{ animation:cassettePulse 1.4s ease-in-out infinite }
+  @keyframes cassettePulse{
+    0%,100%{ filter:drop-shadow(0 10px 24px rgba(0,0,0,.5)) }
+    50%{ filter:drop-shadow(0 10px 30px rgba(99,195,197,.65)) }
+  }
+  .q-eq{ display:flex; align-items:flex-end; gap:4px; height:36px; opacity:.35; transition:opacity .25s }
+  .q-audio.playing .q-eq{ opacity:1 }
+  .q-eq span{
+    width:5px; height:100%; border-radius:3px; transform-origin:bottom; transform:scaleY(.22);
+    background:linear-gradient(180deg,var(--gold-1),var(--gold-3));
+  }
+  .q-audio.playing .q-eq span{ animation:eq 1s ease-in-out infinite }
+  .q-eq span:nth-child(1){ animation-duration:.7s;  animation-delay:0s }
+  .q-eq span:nth-child(2){ animation-duration:1.1s; animation-delay:.15s }
+  .q-eq span:nth-child(3){ animation-duration:.85s; animation-delay:.3s }
+  .q-eq span:nth-child(4){ animation-duration:1.25s;animation-delay:.05s }
+  .q-eq span:nth-child(5){ animation-duration:.9s;  animation-delay:.25s }
+  .q-eq span:nth-child(6){ animation-duration:1.05s;animation-delay:.1s }
+  .q-eq span:nth-child(7){ animation-duration:.75s; animation-delay:.35s }
+  @keyframes eq{ 0%,100%{ transform:scaleY(.22) } 50%{ transform:scaleY(1) } }
+  .q-audio-hint{
+    font-family:'Oswald',sans-serif; font-weight:400;
+    font-size:13px; letter-spacing:.05em; color:var(--gold-1); opacity:.8;
+  }
+  .puzzle{
+    position:relative; width:100%; max-width:520px;
+    margin:22px auto 34px; align-self:center; aspect-ratio:1238 / 871;
+  }
+  .ppiece{
+    position:absolute; display:block; transform-origin:center;
+    transition:transform 1s cubic-bezier(.2,.85,.25,1), filter 1s;
+    filter:drop-shadow(0 8px 16px rgba(0,0,0,.55));
+  }
+  .pp1{ left:0%;    top:0%;     width:57.3%; z-index:4; transform:translate(-15%,-18%) rotate(-10deg) }
+  .pp2{ left:50%;   top:2.6%;   width:50%;   z-index:3; transform:translate(15%,-14%) rotate(8deg) }
+  .pp3{ left:0.5%;  top:51.7%;  width:56.5%; z-index:3; transform:translate(-13%,16%) rotate(9deg) }
+  .pp4{ left:50%;   top:48.6%;  width:49.8%; z-index:2; transform:translate(15%,15%) rotate(-8deg) }
+  .puzzle.assembled .ppiece{ transform:none; filter:drop-shadow(0 3px 7px rgba(0,0,0,.3)) }
+  .q-video{
+    width:100%; max-height:min(46vh,360px);
+    border-radius:10px; background:#000;
+    box-shadow:0 10px 30px rgba(0,0,0,.55);
+  }
+  .meme{
+    width:100%; max-height:min(42vh,340px);
+    object-fit:contain; display:none;
+    border-radius:8px; border:none;
+    filter:drop-shadow(0 10px 22px rgba(0,0,0,.55));
+  }
+  .q-caption{
+    font-family:'Montserrat',sans-serif; font-style:italic; font-weight:500;
+    text-align:center; line-height:1.45; color:var(--gold-1);
+    font-size:clamp(14px,3.9vw,19px); margin-top:-2px;
+    white-space:pre-line; max-width:640px; align-self:center;
+  }
+  .meme.show{display:block}
+  .question{
+    text-align:center;
+    background:linear-gradient(180deg, rgba(124,58,190,.92), rgba(74,28,130,.95));
+    border:2px solid #c9a3ff;
+    border-radius:18px;
+    padding:22px 20px;
+    font-weight:700;
+    font-size:clamp(19px,5.4vw,25px);
+    line-height:1.35;
+    box-shadow:0 6px 26px rgba(0,0,0,.45), inset 0 1px 4px rgba(120,220,220,.25);
+    min-height:96px; display:flex; align-items:center; justify-content:center;
+  }
+
+  .answers{
+    display:grid; grid-template-columns:1fr; gap:11px;
+  }
+  @media(min-width:520px){ .answers{grid-template-columns:1fr 1fr} }
+
+  .answer{
+    position:relative; cursor:pointer;
+    padding:2px; /* рамка */
+    background:linear-gradient(180deg,var(--gold-1),var(--gold-3));
+    clip-path:polygon(3.5% 0, 96.5% 0, 100% 50%, 96.5% 100%, 3.5% 100%, 0 50%);
+    transition:transform .12s ease, opacity .3s;
+  }
+  .answer-inner{
+    display:flex; align-items:center; gap:12px;
+    padding:18px 22px;
+    background:linear-gradient(180deg,var(--blue-1),var(--blue-2));
+    clip-path:polygon(3.5% 0, 96.5% 0, 100% 50%, 96.5% 100%, 3.5% 100%, 0 50%);
+    min-height:56px;
+    transition:background .25s;
+  }
+  .answer .letter{
+    font-family:'Oswald',sans-serif;font-weight:700;
+    color:var(--gold-1); font-size:22px; flex-shrink:0; min-width:24px;
+  }
+  .answer .text{ font-size:clamp(17px,4.8vw,20px); font-weight:600; line-height:1.3}
+  .answer:not(.locked):active{transform:scale(.985)}
+
+  .answer.selected .answer-inner{background:linear-gradient(180deg,#b8f0f1,#3fb3b6)}
+  .answer.selected .letter,.answer.selected .text{color:#062020}
+  .answer.correct{background:linear-gradient(180deg,#5cffa0,#0a7a34)}
+  .answer.correct .answer-inner{background:linear-gradient(180deg,var(--green),var(--green-d))}
+  .answer.correct .letter,.answer.correct .text{color:#fff}
+  .answer.wrong .answer-inner{background:linear-gradient(180deg,var(--red),var(--red-d))}
+  .answer.wrong .letter,.answer.wrong .text{color:#fff}
+  .answer.hidden{opacity:0; pointer-events:none}
+  .answer.locked{pointer-events:none}
+  @keyframes blink{0%,100%{filter:brightness(1)}50%{filter:brightness(1.6)}}
+  .answer.blinking{animation:blink .5s ease-in-out 3}
+
+  .next-btn{
+    margin:6px auto 0; align-self:center;
+    padding:13px 34px; font-size:clamp(14px,4vw,18px);
+    opacity:0; transform:translateY(8px); pointer-events:none;
+    transition:opacity .35s ease, transform .35s ease;
+  }
+  .next-btn.show{opacity:1; transform:none; pointer-events:auto}
+
+  /* ---------- ПОПАП ПОДСКАЗКИ ---------- */
+  .modal{
+    position:absolute; inset:0; z-index:6;
+    background:rgba(4,16,15,.85); backdrop-filter:blur(3px);
+    display:none; align-items:center; justify-content:center; padding:26px;
+  }
+  .modal.show{display:flex}
+  .modal .card{
+    width:100%; max-width:380px;
+    background:linear-gradient(180deg,var(--blue-1),var(--blue-2));
+    border:2px solid var(--gold-2); border-radius:20px;
+    padding:24px; text-align:center;
+    box-shadow:0 12px 40px rgba(0,0,0,.6);
+  }
+  .modal h3{font-family:'Oswald',sans-serif;color:var(--gold-1);letter-spacing:.06em;
+    text-transform:uppercase;font-size:18px;margin-bottom:16px}
+  .bars{display:flex;justify-content:space-around;align-items:flex-end;height:130px;gap:14px;margin:10px 0 6px}
+  .bar{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;height:100%}
+  .bar .col{width:70%;background:linear-gradient(180deg,var(--gold-1),var(--gold-3));border-radius:6px 6px 0 0;
+    transition:height .8s cubic-bezier(.2,.8,.2,1)}
+  .bar .lab{font-family:'Oswald',sans-serif;font-weight:600;color:var(--gold-1)}
+  .bar .pct{font-size:12px;color:rgba(238,243,255,.7)}
+  .friend{font-size:15px;line-height:1.5;color:var(--white)}
+  .friend b{color:var(--gold-1)}
+  .modal .close{margin-top:20px}
+
+  /* помощь зала — QR и счётчик */
+  .aud-hint{font-size:13px;line-height:1.4;color:rgba(234,246,246,.75);margin-bottom:14px}
+  .qr-card{
+    background:#fff; border-radius:14px; padding:12px; line-height:0;
+    width:max-content; margin:0 auto 14px;
+    box-shadow:0 8px 24px rgba(0,0,0,.4);
+  }
+  .qr-card img,.qr-card canvas{display:block; border-radius:4px}
+  .qr-fallback{font-size:11px; word-break:break-all; color:#04100f; max-width:200px; padding:6px}
+  .vote-total{font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;color:var(--gold-1);margin-bottom:12px}
+  .modal.sim .aud-hint,.modal.sim .qr-card,.modal.sim .vote-total{display:none}
+
+  /* экран звонка другу */
+  .call-avatar{ width:108px;height:108px;margin:4px auto 16px;border-radius:50%;position:relative }
+  .call-avatar img{ width:100%;height:100%;border-radius:50%;object-fit:cover;
+    box-shadow:0 6px 18px rgba(0,0,0,.5) }
+  .call-avatar::before{
+    content:"";position:absolute;inset:-6px;border-radius:50%;
+    border:3px solid var(--gold-2);animation:callpulse 1.6s ease-out infinite;
+  }
+  @keyframes callpulse{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.55);opacity:0}}
+  .call-sub{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold-2);margin-bottom:8px}
+  .call-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:clamp(19px,5vw,26px);color:var(--white);line-height:1.2}
+
+  /* экран голосующего зрителя */
+  #voter{justify-content:flex-start; padding-top:calc(40px + env(safe-area-inset-top))}
+  .voter-inner{width:100%; max-width:520px; margin-top:24px}
+  .voter-status{
+    text-align:center;font-family:'Oswald',sans-serif;font-weight:500;
+    font-size:clamp(16px,4.6vw,21px);color:var(--gold-1);margin-bottom:22px;min-height:26px;
+  }
+  .voter-options{display:flex; flex-direction:column; gap:12px}
+
+  /* ---------- ФИНАЛ ---------- */
+  #result{ justify-content:flex-start; overflow-y:auto; padding-top:calc(28px + env(safe-area-inset-top)) }
+  #result .brand h1{font-size:clamp(23px,6.2vw,38px)}
+  .values-img{ width:100%; max-width:920px; height:auto; margin:16px auto 22px;
+    border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,.5) }
+  .result-sum{
+    font-family:'Oswald',sans-serif;font-weight:700;
+    font-size:clamp(30px,9vw,54px);
+    color:var(--gold-1);
+    text-shadow:0 3px 18px rgba(99,195,197,.55);
+    margin:8px 0 4px;
+  }
+  .result-msg{max-width:360px;text-align:center;line-height:1.55;color:rgba(238,243,255,.85);margin-top:6px}
+
+  /* стикеры на заставке */
+  .stickers{position:absolute; inset:0; z-index:0; pointer-events:none; overflow:hidden}
+  .sticker{position:absolute; width:clamp(60px,17vw,98px);
+    filter:drop-shadow(0 6px 14px rgba(0,0,0,.4)); animation:bob 6s ease-in-out infinite}
+  .s1{top:4%;left:3%;transform:rotate(-11deg);animation-delay:0s}
+  .s2{top:5%;right:2%;transform:rotate(9deg);animation-delay:.5s}
+  .s3{top:31%;left:-1%;transform:rotate(7deg);animation-delay:1s}
+  .s4{top:29%;right:-1%;transform:rotate(-8deg);animation-delay:1.5s}
+  .s5{bottom:9%;left:3%;transform:rotate(10deg);animation-delay:2s}
+  .s6{bottom:7%;right:2%;transform:rotate(-9deg);animation-delay:2.5s}
+  #start .brand{position:relative;z-index:2}
+  #start .btn-gold{position:relative;z-index:2}
+  @keyframes bob{0%,100%{translate:0 0}50%{translate:0 -7px}}
+
+  /* ---------- ОДИНАКОВЫЕ РАМКИ ОТВЕТОВ ---------- */
+  .answers{grid-auto-rows:1fr}
+  .answer{display:flex}
+  .answer-inner{flex:1; width:100%; min-height:72px}
+
+  /* ---------- КАРТОЧКА-ОБОСНОВАНИЕ ---------- */
+  .explain-card{
+    max-width:460px; text-align:left;
+    border:none; padding:2px; background:linear-gradient(160deg,var(--gold-1),var(--gold-3));
+    border-radius:22px;
+  }
+  .explain-inner{
+    background:linear-gradient(180deg,var(--blue-1),var(--blue-2));
+    border-radius:20px; padding:26px 24px 22px;
+    max-height:78vh; overflow-y:auto;
+  }
+  .explain-kicker{
+    font-family:'Oswald',sans-serif; font-weight:600; font-size:12px;
+    letter-spacing:.28em; text-transform:uppercase; color:var(--gold-2);
+    margin-bottom:10px; text-align:center;
+  }
+  .explain-title{
+    font-family:'Oswald',sans-serif; font-weight:700; text-transform:uppercase;
+    font-size:clamp(18px,5vw,24px); line-height:1.15; text-align:center;
+    background:linear-gradient(180deg,#fff 0%,var(--gold-1) 45%,var(--gold-2) 100%);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    margin-bottom:12px;
+  }
+  .explain-def{
+    font-size:17px; font-weight:600; line-height:1.5; text-align:center;
+    color:var(--white); margin-bottom:14px;
+  }
+  .explain-divider{
+    height:1px; margin:0 auto 14px; width:70%;
+    background:linear-gradient(90deg,transparent,var(--gold-3),transparent);
+  }
+  .explain-story{
+    font-size:16px; line-height:1.6; color:rgba(234,246,246,.88); text-align:left;
+  }
+  .explain-inner .close{display:block; margin:20px auto 0}
+
+  /* ---------- ОПРОС ---------- */
+  #feedback{justify-content:flex-start; overflow-y:auto; padding-top:calc(34px + env(safe-area-inset-top))}
+  .fb-wrap{width:100%; max-width:470px; display:flex; flex-direction:column; gap:14px; align-items:stretch; margin-top:20px; text-align:center}
+  .fb-q{font-size:15px; line-height:1.55; color:rgba(238,243,255,.9)}
+  .fb-input{
+    font-family:'Montserrat',sans-serif; font-size:15px; color:var(--white);
+    background:rgba(4,16,15,.55); border:2px solid var(--gold-3); border-radius:14px;
+    padding:13px 15px; outline:none; resize:vertical; width:100%;
+  }
+  .fb-input:focus{border-color:var(--gold-2); box-shadow:0 0 0 3px rgba(99,195,197,.2)}
+  .fb-input::placeholder{color:rgba(234,246,246,.4)}
+  .btn-outline{background:transparent !important; color:var(--gold-1) !important; border:2px solid var(--gold-2) !important; box-shadow:none !important}
+  #feedback .btn-gold{margin-top:4px}
+
+  /* просмотр ответов опроса */
+  #fbAdmin{justify-content:flex-start; overflow-y:auto; padding-top:calc(34px + env(safe-area-inset-top))}
+  .fb-list{width:100%; max-width:580px; display:flex; flex-direction:column; gap:12px; margin-top:18px; padding-bottom:40px}
+  .fb-item{
+    background:linear-gradient(180deg,var(--blue-1),var(--blue-2));
+    border:1px solid var(--gold-3); border-radius:14px; padding:14px 16px; text-align:left;
+  }
+  .fb-meta{font-size:12px; color:var(--gold-2); margin-bottom:6px}
+  .fb-body{font-size:14px; line-height:1.55; white-space:pre-wrap}
+  #result .btn-gold + .btn-gold{margin-top:12px}
+</style>
+</head>
+<body>
+
+<!-- ЭКРАН 1 — ЗАСТАВКА -->
+<section class="screen active" id="start">
+  <div class="stickers"><img class="sticker s1" alt="" src="assets/e304eaf7011b.png"><img class="sticker s2" alt="" src="assets/4dc63a1f7e01.png"><img class="sticker s3" alt="" src="assets/a770575a29fa.png"><img class="sticker s4" alt="" src="assets/fc52e42639d2.png"><img class="sticker s5" alt="" src="assets/05bb54afe38b.png"><img class="sticker s6" alt="" src="assets/3e3ae2be92bd.png"></div>
+  <div class="brand">
+    <svg class="mark" viewBox="0 0 96 84" xmlns="http://www.w3.org/2000/svg" aria-label="Мастерская новых медиа">
+      <rect x="12" y="0"/><rect x="24" y="0"/>
+      <rect x="0" y="12"/><rect x="12" y="12"/>
+      <rect x="0" y="24"/><rect x="24" y="24"/><rect x="60" y="24"/>
+      <rect x="24" y="36"/><rect x="36" y="36"/><rect x="48" y="36"/><rect x="60" y="36"/>
+      <rect x="24" y="48"/><rect x="60" y="48"/><rect x="84" y="48"/>
+      <rect x="72" y="60"/><rect x="84" y="60"/>
+      <rect x="60" y="72"/><rect x="72" y="72"/>
+    </svg>
+    <div class="kicker">Мастерская новых медиа</div>
+    <div class="sub">5 лет МНМ</div>
+    <h1>Игра на миллион<br>смыслов</h1>
+  </div>
+  <button class="btn-gold pulse" onclick="startGame()">Начать игру</button>
+</section>
+
+<!-- ЭКРАН 2 — ИГРА -->
+<section class="screen" id="game">
+  <div class="topbar">
+    <div class="q-index" id="qIndex">Вопрос 1 / 8</div>
+    <div class="progress" id="progress"></div>
+  </div>
+
+  <div class="lifelines" id="lifelines">
+    <div class="lifeline" id="ll-5050" onclick="useFifty()">50:50</div>
+    <div class="lifeline" id="ll-audience" onclick="useAudience()">
+      <svg viewBox="0 0 24 24"><circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M3 20c0-3 2.5-5 5-5s5 2 5 5M13 20c0-2 1.5-4 3.5-4.5"/></svg>
+    </div>
+    <div class="lifeline" id="ll-phone" onclick="usePhone()">
+      <svg viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-1z"/></svg>
+    </div>
+  </div>
+
+  <div class="qwrap">
+    <img class="meme" id="memeImg" alt="Мем к вопросу">
+    <video class="q-video" id="qVideo" playsinline controls preload="metadata" style="display:none"></video>
+    <div class="puzzle" id="qPuzzle" style="display:none"></div>
+    <div class="q-caption" id="qCaption" style="display:none"></div>
+    <div class="question" id="questionText">Вопрос загружается…</div>
+    <div class="q-audio" id="qAudioBox" onclick="toggleQuestionAudio()" style="display:none">
+      <div class="q-eq"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      <img class="q-audio-img" src="assets/b46cb0b12931.webp" alt="Слушать вопрос">
+      <div class="q-audio-hint">Нажмите, чтобы прослушать</div>
+    </div>
+    <div class="answers" id="answers"></div>
+    <button class="btn-gold next-btn" id="nextBtn" onclick="nextQuestion()">Следующий вопрос</button>
+  </div>
+</section>
+
+<!-- МОДАЛКА — ПОМОЩЬ ЗАЛА -->
+<div class="modal" id="audienceModal">
+  <div class="card">
+    <h3>Помощь зала</h3>
+    <p class="aud-hint" id="audHint">Отсканируйте QR-код и проголосуйте со своего телефона</p>
+    <div class="qr-card" id="qrBox"></div>
+    <div class="vote-total" id="voteTotal">Голосов: 0</div>
+    <div class="bars" id="audienceBars"></div>
+    <button class="btn-gold close" onclick="closeAudience()">Закрыть</button>
+  </div>
+</div>
+
+<!-- МОДАЛКА — ЗВОНОК ДРУГУ -->
+<div class="modal" id="phoneModal">
+  <div class="card">
+    <div class="call-avatar"><img src="assets/95614d2a2ee3.webp" alt="Михаил Канавцев"></div>
+    <div class="call-sub">Звонок другу</div>
+    <div class="call-title" id="callTitle">Звонок Михаилу Канавцеву</div>
+    <p class="friend" id="friendText" style="margin-top:16px; min-height:44px">Соединяем…</p>
+    <button class="btn-gold close" onclick="closePhone()">Готово</button>
+  </div>
+</div>
+
+<!-- МОДАЛКА — КАРТОЧКА ЦЕННОСТИ -->
+<div class="modal" id="explainModal">
+  <div class="card explain-card">
+    <div class="explain-inner">
+      <div class="explain-kicker">Ценность МНМ</div>
+      <div class="explain-title" id="expTitle"></div>
+      <p class="explain-def" id="expDef"></p>
+      <div class="explain-divider"></div>
+      <p class="explain-story" id="expStory"></p>
+      <button class="btn-gold close" onclick="closeExplain()">Понятно</button>
+    </div>
+  </div>
+</div>
+
+<!-- ЭКРАН 3 — ФИНАЛ -->
+<section class="screen" id="result">
+  <div class="brand">
+    <div class="emblem"><span id="resultIcon">★</span></div>
+    <h1 id="resultTitle">Итог</h1>
+  </div>
+  <div class="result-sum" id="resultSum">0 / 8</div>
+  <p class="result-msg" id="resultMsg"></p>
+  <img class="values-img" src="assets/114837c85dd8.webp" alt="8 ценностей Мастерской новых медиа">
+  <button class="btn-gold" onclick="location.reload()">Играть снова</button>
+  <button class="btn-gold btn-outline" onclick="openEpisodeFeedback()">Оценить выбор эпизодов</button>
+</section>
+
+
+
+<!-- МОДАЛКА — ОЦЕНКА ЭПИЗОДОВ -->
+<div class="modal" id="episodeModal">
+  <div class="card" style="max-width:480px; text-align:left; padding:26px 24px">
+    <div id="epForm">
+      <div style="font-family:'Oswald',sans-serif; font-weight:700; text-transform:uppercase; font-size:clamp(18px,5vw,22px); text-align:center; color:var(--gold-1); margin-bottom:14px; line-height:1.2">А ты согласен?</div>
+      <p style="font-size:15px; line-height:1.55; color:rgba(234,246,246,.9); margin-bottom:16px; text-align:center">Соответствуют ли эпизоды в вопросах указанным ценностям? Если нет — предложи свой вариант.</p>
+      <textarea class="fb-input" id="epText" rows="5" placeholder="Ваше мнение или свой вариант эпизода…" style="width:100%; margin-bottom:12px"></textarea>
+      <input class="fb-input" id="epName" placeholder="Ваше имя (по желанию)" style="width:100%; margin-bottom:16px">
+      <button class="btn-gold" style="width:100%; margin-bottom:10px" onclick="sendEpisodeFeedback()">Отправить</button>
+      <button class="btn-gold btn-outline" style="width:100%" onclick="closeModal('episodeModal')">Закрыть</button>
+    </div>
+    <div id="epThanks" style="display:none; text-align:center">
+      <div class="emblem" style="margin:0 auto 14px"><span>✓</span></div>
+      <p style="font-size:16px; line-height:1.5; color:var(--white); margin-bottom:18px">Спасибо! Ваше мнение отправлено — мы обязательно его учтём.</p>
+      <button class="btn-gold" style="width:100%" onclick="closeModal('episodeModal')">Готово</button>
+    </div>
+  </div>
+</div>
+
+<!-- ЭКРАН ГОЛОСУЮЩЕГО (открывается по QR: ?vote) -->
+<section class="screen" id="voter">
+  <div class="brand" style="gap:4px">
+    <svg class="mark" viewBox="0 0 96 84" xmlns="http://www.w3.org/2000/svg" style="width:clamp(44px,12vw,64px);margin-bottom:8px">
+      <rect x="12" y="0"/><rect x="24" y="0"/>
+      <rect x="0" y="12"/><rect x="12" y="12"/>
+      <rect x="0" y="24"/><rect x="24" y="24"/><rect x="60" y="24"/>
+      <rect x="24" y="36"/><rect x="36" y="36"/><rect x="48" y="36"/><rect x="60" y="36"/>
+      <rect x="24" y="48"/><rect x="60" y="48"/><rect x="84" y="48"/>
+      <rect x="72" y="60"/><rect x="84" y="60"/>
+      <rect x="60" y="72"/><rect x="72" y="72"/>
+    </svg>
+    <div class="kicker">Помощь зала</div>
+  </div>
+  <div class="voter-inner">
+    <div class="voter-status" id="voterStatus">Подключение…</div>
+    <div class="voter-options" id="voterOptions"></div>
+  </div>
+</section>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script>
+/* ============================================================
+   ВОПРОСЫ. Чтобы поменять игру — редактируйте только этот массив.
+   correct — индекс правильного ответа (0=A, 1=B, 2=C, 3=D)
+   audio   — mp3-клип к вопросу (появится кнопка «Слушать»); "" если нет
+   video   — mp4-видео к вопросу (появится плеер); "" если нет
+   caption — подпись курсивом под картинкой; "" если нет
+   puzzle  — массив из 4 картинок-частей; собираются при ответе
+   meme    — картинка над вопросом. Можно указать:
+             • ссылку: "https://site.ru/mem.jpg"
+             • файл рядом с игрой: "memes/vopros2.jpg"
+             • оставить "" — тогда мем не показывается
+   ============================================================ */
+const MEME_1 = "assets/d8346bb6c032.jpg";
+
+const AUDIO_Q1 = "assets/d6393ccfdef7.mp3";
+
+const MEME_2 = "assets/19db968da0bd.webp";
+
+const VIDEO_Q3 = "assets/f748f8460e1b.mp4";
+
+const MEME_4 = "assets/b147e1d2fd3e.webp";
+
+const MEME_5 = "assets/4cf7e939e2fc.webp";
+
+const PUZZLE_6 = ["assets/5597b0282679.webp","assets/1886fb4b9625.webp","assets/a752e71013df.webp","assets/4fddb8ec1baa.webp"];
+
+const MEME_7 = "assets/1f9cdf1fb7c5.webp";
+
+const MEME_8 = "assets/1971c7ce353b.webp";
+
+const VIDEO_Q8 = "assets/159e3bfa7ccd.mp4";
+
+const QUESTIONS = [
+  { q:"Какая это ценность?", audio:AUDIO_Q1, a:["Взаимная поддержка и партнёрская позиция","Системное мышление","Готовность работать с образом будущего","Честность"], correct:0, meme:"" },
+  { q:"Какая ценность отражена в известной картине Ф. Решетникова?", a:["Умная доброта","Ответственность за создание лучших условий в медиа","Прогрессивность и технологичность","Честность"], correct:3, meme:MEME_2 },
+  { q:"О какой ценности говорит героиня сериала «Спящие» Кира?", video:VIDEO_Q3, a:["Готовность работать с образом будущего","Ответственность за создание лучших условий в медиа","Прогрессивность и технологичность","Честность"], correct:0, meme:"" },
+  { q:"Какая ценность отражена в книге Сент-Экзюпери?", caption:"«Мы в ответе за тех, кого приручили»", a:["Честность","Умная доброта","Ответственность за создание лучших условий в медиа","Ценностная преемственность"], correct:1, meme:MEME_4 },
+  { q:"За какую ценность отвечает цитата из книги?", caption:"«Настоящий человек определяется не тем, что с ним произошло, а тем, что он решил делать после этого.»", a:["Честность","Прогрессивность и технологичность","Системное мышление","Ценностная преемственность"], correct:3, meme:MEME_5 },
+  { q:"Какую ценность раскрывает собранный пазл?", puzzle:PUZZLE_6, a:["Честность","Системное мышление","Умная доброта","Прогрессивность и технологичность"], correct:1, meme:"" },
+  { q:"Какую ценность раскрывает эта цитата?", caption:"«Человеку нужен человек... Мы вовсе не хотим завоёвывать никакой космос, мы хотим расширить Землю до его границ.»", a:["Честность","Прогрессивность и технологичность","Системное мышление","Готовность работать с образом будущего"], correct:1, meme:MEME_7 },
+  { q:"Какая ценность отображена в диалоге?", caption:"Ребята: «Алиса, а кем я стану? А я? Расскажи про нас!»\nАлиса: «Боря станет знаменитым художником... Мила — детским врачом, к ней будут прилетать со всех концов Вселенной... А Коля Герасимов напишет стихи, и их будут петь на разных языках...»", a:["Умная доброта","Ответственность за создание лучших условий в медиа","Ценностная преемственность","Системное мышление"], correct:1, meme:"", video:VIDEO_Q8 },
+];
+
+const LETTERS = ["A","B","C","D"];
+
+/* Карточки-обоснования: показываются после каждого ответа */
+const EXPLAIN = [
+  { title:"Взаимная поддержка и партнёрская позиция",
+    def:"Помогать друг другу, слышать разные мнения и вместе двигаться к общему результату.",
+    story:"Песня из м/ф «Бременские музыканты» напоминает нам историю друзей-музыкантов, которые все очень разные по характеру, но одинаково любят музыку и идут к общей цели." },
+  { title:"Честность",
+    def:"Говорить правду, соблюдать договорённости и оставаться верным своим принципам.",
+    story:"На картине «Опять двойка» мальчик не скрывает свою неудачу, а честно возвращается домой с поникшей головой, показывая глубокое раскаяние и стыд перед семьёй." },
+  { title:"Готовность работать с образом будущего",
+    def:"Представлять желаемое будущее и превращать его в план конкретных действий.",
+    story:"Героиня сериала «Спящие» Кира готова поступиться личными интересами и прикладывать все усилия, чтобы помочь нескольким талантливым людям получить мировое признание." },
+  { title:"Умная доброта",
+    def:"Готовность помогать осознанно, понимая ситуацию и учитывая последствия своих действий.",
+    story:"«Мы в ответе за тех, кого приручили» — Антуан де Сент-Экзюпери, «Маленький принц». Здесь умная доброта — это не просто сделать добро, а подумать, действительно ли твоя помощь будет полезна и к каким последствиям она приведёт." },
+  { title:"Ценностная преемственность",
+    def:"Сохранять и передавать важные смыслы, нравственные ориентиры и культурные традиции.",
+    story:"«Повесть о настоящем человеке» Бориса Полевого передаёт от поколения к поколению нравственный ориентир: человека определяют не обстоятельства, а его выбор, стойкость и поступки." },
+  { title:"Системное мышление",
+    def:"Видеть ситуацию целиком, понимать взаимосвязи и принимать решения с учётом долгосрочных последствий.",
+    story:"Пазл «Велосипед» отражает мысль, что системное мышление начинается тогда, когда мы перестаём спорить о частях и начинаем видеть целое, понимать взаимосвязи и принимать решения, которые работают в долгосрочной перспективе." },
+  { title:"Прогрессивность и технологичность",
+    def:"Быть открытыми новому, использовать современные технологии и искать более эффективные способы работы.",
+    story:"Цитата «Человеку нужен человек… Мы вовсе не хотим завоёвывать никакой космос. Мы хотим расширить Землю до его границ» из фильма «Солярис» подчёркивает, что технологии и открытия должны расширять человеческие возможности. Настоящий прогресс служит человеку, помогает познавать новое и создавать более эффективное будущее." },
+  { title:"Ответственность за создание лучших условий в медиа",
+    def:"Лично участвовать в создании медиасреды, в которой ценности МНМ становятся нормой.",
+    story:"Алиса показывает, что каждый человек своими способностями и поступками создаёт общее будущее. Так и лучшие условия в медиа появляются благодаря личному вкладу каждого, а не сами по себе." },
+];
+
+function openExplain(){
+  const e = EXPLAIN[current];
+  if(!e){ if(locked) document.getElementById('nextBtn').classList.add('show'); return; }
+  explainShownFor = current;
+  document.getElementById('expTitle').textContent = e.title;
+  document.getElementById('expDef').textContent = e.def;
+  document.getElementById('expStory').textContent = e.story;
+  closeModal('phoneModal');
+  closeModal('audienceModal');
+  openModal('explainModal');
+}
+function closeExplain(){
+  closeModal('explainModal');
+  if(locked) document.getElementById('nextBtn').classList.add('show');
+}
+
+/* ---- Опрос для улучшения игры ---- */
+/* ---- Оценка эпизодов: ответ летит в Telegram-бот ---- */
+function openEpisodeFeedback(){
+  document.getElementById('epText').value = '';
+  document.getElementById('epThanks').style.display = 'none';
+  document.getElementById('epForm').style.display = '';
+  openModal('episodeModal');
+}
+function sendEpisodeFeedback(){
+  const text = document.getElementById('epText').value.trim();
+  const name = document.getElementById('epName').value.trim();
+  if(!text){ document.getElementById('epText').focus(); return; }
+  const btn = document.querySelector('#epForm .btn-gold');
+  if(btn){ btn.disabled = true; btn.textContent = 'Отправляем…'; }
+  const reset = ()=>{ if(btn){ btn.disabled = false; btn.textContent = 'Отправить'; } };
+  const TG_TOKEN = "8459968797:AAHPm18oEBGIU9VpHWJA3YB4EGhNkwCyvRc";
+  const TG_CHAT  = "159407941";
+  const msg =
+    '🎬 Оценка эпизодов (игра «5 лет МНМ»)\n' +
+    (name ? '👤 ' + name + '\n' : '') +
+    '🕒 ' + new Date().toLocaleString('ru-RU') + '\n\n' +
+    '💬 ' + text;
+  fetch('https://api.telegram.org/bot' + TG_TOKEN + '/sendMessage', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat_id: TG_CHAT, text: msg })
+  }).then(r=>r.json()).then(d=>{
+    if(d && d.ok){
+      document.getElementById('epForm').style.display = 'none';
+      document.getElementById('epThanks').style.display = 'block';
+    }else{ reset(); alert('Не удалось отправить. Попробуйте ещё раз.'); }
+  }).catch(()=>{ reset(); alert('Не удалось отправить. Проверьте интернет и попробуйте снова.'); });
+}
+
+/* ============================================================
+   ЗВУКИ. Вставьте ссылку на mp3 в кавычки (или оставьте "" — без звука).
+   intro    — музыка на заставке (первый экран)
+   voting   — играет, пока идёт голосование зала («Помощь зала»)
+   fifty    — звук подсказки 50:50
+   thinking — фоновая музыка размышления над вопросом
+   correct  — правильный ответ
+   wrong    — неправильный ответ
+   finalThinking — музыка на последнем (самом сложном) вопросе
+   phone    — обратный отсчёт «Звонок другу»
+   win      — музыка в конце игры (финальный экран)
+   ============================================================ */
+const SOUNDS = {
+  intro:    "assets/c6d4ba185d6a.mp3",
+  voting:   "assets/6db4074444b6.mp3",
+  fifty:    "assets/95b464ab766f.mp3",
+  thinking: "assets/e8b17782819d.mp3",
+  correct:  "assets/66d2f290fda5.mp3",
+  wrong:    "assets/72bab66aae41.mp3",
+  phone:    "assets/6f41e179b55b.mp3",
+  lose:     "",
+  finalThinking: "assets/62820fe64d16.mp3",
+  win:      "assets/7741cc8b4c18.mp3",
+};
+
+const _audio = {};
+function playSound(name, loop){
+  const src = SOUNDS[name];
+  if(!src) return;
+  let a = _audio[name];
+  if(!a){ a = new Audio(src); a.preload = "auto"; _audio[name] = a; }
+  a.loop = !!loop;
+  try{ a.currentTime = 0; }catch(e){}
+  a.play().catch(()=>{});
+}
+function stopSound(name){
+  const a = _audio[name];
+  if(a){ a.pause(); try{ a.currentTime = 0; }catch(e){} }
+}
+function stopAllSounds(){ Object.keys(_audio).forEach(stopSound); }
+function dataUriToBlobUrl(uri){
+  const comma = uri.indexOf(',');
+  const mime = (uri.slice(5, comma).split(';')[0]) || 'application/octet-stream';
+  const bin = atob(uri.slice(comma+1));
+  const bytes = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i);
+  return URL.createObjectURL(new Blob([bytes], {type:mime}));
+}
+function toggleQuestionAudio(){
+  if(!questionAudio) return;
+  const box = document.getElementById('qAudioBox');
+  if(questionAudio.paused){
+    stopSound(activeThinking);
+    questionAudio.play().catch(()=>{});
+    box.classList.add('playing');
+  }else{
+    questionAudio.pause();
+    box.classList.remove('playing');
+    if(!locked) playSound(activeThinking, true);
+  }
+}
+
+/* ============================================================
+   НАСТРОЙКА РЕАЛЬНОГО ГОЛОСОВАНИЯ ЗАЛА (по желанию)
+   1. Создайте бесплатный проект на firebase.google.com
+   2. Включите Realtime Database
+   3. Вставьте сюда конфиг проекта (Project settings → SDK setup → Config)
+   Если оставить пустым — «Помощь зала» работает в демо-режиме (без QR).
+   ============================================================ */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBXWhYUZhqDZy0M8ww-MPl36eYh3sDLXjg",
+  authDomain: "mnm-game.firebaseapp.com",
+  databaseURL: "https://mnm-game-default-rtdb.firebaseio.com",
+  projectId: "mnm-game",
+  storageBucket: "mnm-game.firebasestorage.app",
+  messagingSenderId: "98112010777",
+  appId: "1:98112010777:web:62d51e4cc6724227ec8888",
+  measurementId: "G-HBNVDBS28J"
+};
+
+/* Адрес страницы голосования (vote.html), выложенной в интернете.
+   Заполните — и QR будет вести на неё; голосование заработает даже
+   когда игра открыта файлом. Пусто — QR ведёт на саму игру (?vote). */
+const VOTE_URL = "https://britvinamaria-sketch.github.io/mnm/vote.html";
+
+let db = null, firebaseReady = false;
+try{
+  if(window.firebase && FIREBASE_CONFIG && FIREBASE_CONFIG.databaseURL){
+    firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.database();
+    firebaseReady = true;
+  }
+}catch(e){ console.warn('Firebase не подключён:', e); }
+
+const IS_VOTER = new URLSearchParams(location.search).has('vote');
+let activeThinking = 'thinking';
+let questionAudio = null;
+let currentPollOptions = [];
+let votesListener = null;
+
+let current = 0;
+let score = 0;
+let explainShownFor = -1;   // для какого вопроса карточка уже показана
+let friendAnsweredFor = -1; // на каком вопросе Михаил успел дать ответ
+let locked = false;
+let used = { fifty:false, audience:false, phone:false };
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startGame(){
+  stopAllSounds();
+  current = 0;
+  score = 0;
+  used = { fifty:false, audience:false, phone:false };
+  ['ll-5050','ll-audience','ll-phone'].forEach(id=>document.getElementById(id).classList.remove('used'));
+  show('game');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  locked = false;
+  document.getElementById('nextBtn').classList.remove('show');
+  const item = QUESTIONS[current];
+  document.getElementById('qIndex').textContent = `Вопрос ${current+1} / ${QUESTIONS.length}`;
+  renderProgress();
+
+  const qVideo = document.getElementById('qVideo');
+  if(item.video){
+    if(!item._videoUrl){
+      item._videoUrl = item.video.startsWith('data:') ? dataUriToBlobUrl(item.video) : item.video;
+    }
+    qVideo.src = item._videoUrl;
+    qVideo.style.display = 'block';
+    qVideo.onerror = ()=>{
+      qVideo.style.display = 'none';
+      const cap = document.getElementById('qCaption');
+      if(cap){ cap.textContent = 'Видео не загрузилось — обновите страницу или проверьте интернет.'; cap.style.display='block'; }
+    };
+    qVideo.onplay  = ()=>{ stopSound(activeThinking); };
+    qVideo.onpause = ()=>{ if(!locked && !qVideo.ended) playSound(activeThinking, true); };
+    qVideo.onended = ()=>{ if(!locked) playSound(activeThinking, true); };
+    qVideo.play().catch(()=>{});
+  }else{
+    try{ qVideo.pause(); }catch(e){}
+    qVideo.removeAttribute('src'); qVideo.style.display = 'none';
+  }
+  const qPuzzle = document.getElementById('qPuzzle');
+  if(item.puzzle && item.puzzle.length===4){
+    qPuzzle.innerHTML = item.puzzle.map((src,i)=>'<img class="ppiece pp'+(i+1)+'" src="'+src+'" alt="">').join('');
+    qPuzzle.style.display = '';
+    qPuzzle.classList.remove('assembled');
+  }else{
+    qPuzzle.style.display = 'none';
+    qPuzzle.innerHTML = '';
+  }
+  const meme = document.getElementById('memeImg');
+  if(item.meme){
+    meme.onerror = ()=> meme.classList.remove('show');
+    meme.src = item.meme;
+    meme.classList.add('show');
+  }else{
+    meme.classList.remove('show');
+    meme.removeAttribute('src');
+  }
+  const qCap = document.getElementById('qCaption');
+  if(item.caption){ qCap.textContent = item.caption; qCap.style.display = ''; }
+  else{ qCap.style.display = 'none'; }
+
+  document.getElementById('questionText').textContent = item.q;
+  const qAudioBox = document.getElementById('qAudioBox');
+  if(item.audio){
+    questionAudio = new Audio(item.audio);
+    questionAudio.onended = ()=>{ qAudioBox.classList.remove('playing'); if(!locked) playSound(activeThinking, true); };
+    qAudioBox.style.display = '';
+    qAudioBox.classList.remove('playing');
+  }else{
+    questionAudio = null;
+    qAudioBox.style.display = 'none';
+  }
+  activeThinking = (current === QUESTIONS.length - 1 && SOUNDS.finalThinking) ? 'finalThinking' : 'thinking';
+  if(!item.video) playSound(activeThinking, true);
+
+  const wrap = document.getElementById('answers');
+  wrap.innerHTML = "";
+  item.a.forEach((text,i)=>{
+    const el = document.createElement('div');
+    el.className = "answer";
+    el.innerHTML = `<div class="answer-inner"><span class="letter">${LETTERS[i]}</span><span class="text">${text}</span></div>`;
+    el.onclick = ()=>choose(i, el);
+    wrap.appendChild(el);
+  });
+}
+
+function choose(i, el){
+  if(locked) return;
+  locked = true;
+  stopSound(activeThinking);
+  if(questionAudio){ questionAudio.pause(); document.getElementById('qAudioBox').classList.remove('playing'); }
+  try{ document.getElementById('qVideo').pause(); }catch(e){}
+  el.classList.add('selected','blinking');
+  const correct = QUESTIONS[current].correct;
+
+  setTimeout(()=>{
+    el.classList.remove('blinking','selected');
+    const nodes = document.querySelectorAll('.answer');
+    if(i === correct){
+      el.classList.add('correct');
+      playSound('correct');
+      score++;
+    }else{
+      el.classList.add('wrong');
+      nodes[correct].classList.add('correct');
+      playSound('wrong');
+    }
+    if(QUESTIONS[current].puzzle){ document.getElementById('qPuzzle').classList.add('assembled'); }
+    const btn = document.getElementById('nextBtn');
+    btn.textContent = (current >= QUESTIONS.length - 1) ? "Узнать результат" : "Следующий вопрос";
+    setTimeout(()=>{
+      if(explainShownFor === current) btn.classList.add('show');
+      else openExplain();
+    }, 900);
+  }, 1700);
+}
+
+function nextQuestion(){
+  current++;
+  if(current >= QUESTIONS.length){ finish(); return; }
+  renderQuestion();
+}
+
+/* ---- Подсказки ---- */
+function useFifty(){
+  if(used.fifty) return; used.fifty=true;
+  document.getElementById('ll-5050').classList.add('used');
+  playSound('fifty');
+  const correct = QUESTIONS[current].correct;
+  const wrong = [0,1,2,3].filter(i=>i!==correct);
+  // убираем два случайных неверных
+  wrong.sort(()=>Math.random()-.5);
+  const nodes = document.querySelectorAll('.answer');
+  nodes[wrong[0]].classList.add('hidden');
+  nodes[wrong[1]].classList.add('hidden');
+}
+
+function useAudience(){
+  if(used.audience) return; used.audience=true;
+  document.getElementById('ll-audience').classList.add('used');
+  stopSound(activeThinking);
+  playSound('voting', true);
+  const visible = [...document.querySelectorAll('#answers .answer')]
+    .map((n,i)=>({i,hidden:n.classList.contains('hidden')})).filter(o=>!o.hidden).map(o=>o.i);
+  const opts = visible.map(i=>({ i, letter:LETTERS[i], text:QUESTIONS[current].a[i] }));
+  openSimAudience(opts);
+}
+
+/* Реальное голосование зала через Firebase + QR */
+function openRealAudience(opts){
+  currentPollOptions = opts;
+  const round = String(Date.now());
+  db.ref('poll').set({ active:true, round, qid:current,
+    options: opts.map(o=>({ i:o.i, letter:o.letter, text:o.text })), votes:{} });
+
+  const url = VOTE_URL || (location.origin + location.pathname + '?vote');
+  const box = document.getElementById('qrBox');
+  box.innerHTML = '';
+  if(typeof QRCode !== 'undefined'){
+    new QRCode(box, { text:url, width:200, height:200,
+      colorDark:'#04100f', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.M });
+  }else{
+    box.innerHTML = '<div class="qr-fallback">'+url+'</div>';
+  }
+  document.getElementById('voteTotal').textContent = 'Голосов: 0';
+  document.getElementById('audienceBars').innerHTML = opts.map(o=>
+    `<div class="bar"><span class="pct">0%</span><div class="col" style="height:0"></div><span class="lab">${o.letter}</span></div>`).join('');
+
+  document.getElementById('audienceModal').classList.remove('sim');
+  openModal('audienceModal');
+
+  votesListener = db.ref('poll/votes');
+  votesListener.on('value', s => renderAudienceBars(s.val() || {}));
+}
+
+function renderAudienceBars(votesObj){
+  const opts = currentPollOptions;
+  const counts = opts.map(o => votesObj[o.i] || 0);
+  const total = counts.reduce((a,b)=>a+b,0);
+  document.getElementById('voteTotal').textContent = 'Голосов: ' + total;
+  const bars = document.getElementById('audienceBars');
+  bars.innerHTML = opts.map((o,k)=>{
+    const p = total ? Math.round(counts[k]/total*100) : 0;
+    return `<div class="bar"><span class="pct">${p}%</span><div class="col" style="height:${p}%"></div><span class="lab">${o.letter}</span></div>`;
+  }).join('');
+}
+
+function closeAudience(){
+  stopSound('voting');
+  if(!locked) playSound(activeThinking, true);
+  if(firebaseReady){
+    if(votesListener){ votesListener.off(); votesListener = null; }
+    db.ref('poll/active').set(false).catch(()=>{});
+  }
+  closeModal('audienceModal');
+}
+
+/* Демо-режим (если Firebase не настроен) */
+function openSimAudience(opts){
+  const correct = QUESTIONS[current].correct;
+  let pcts = {}, rest = 100;
+  const base = Math.floor(45 + Math.random()*30);
+  pcts[correct] = base; rest -= base;
+  const others = opts.map(o=>o.i).filter(i=>i!==correct);
+  others.forEach((idx,k)=>{ const v = k===others.length-1 ? rest : Math.floor(Math.random()*rest); pcts[idx]=v; rest-=v; });
+  const bars = document.getElementById('audienceBars');
+  bars.innerHTML = opts.map(o=>
+    `<div class="bar"><span class="pct">${pcts[o.i]||0}%</span><div class="col" style="height:0"></div><span class="lab">${o.letter}</span></div>`).join('');
+  document.getElementById('audienceModal').classList.add('sim');
+  openModal('audienceModal');
+  setTimeout(()=>{
+    const cols = bars.querySelectorAll('.col');
+    opts.forEach((o,k)=>{ cols[k].style.height = (pcts[o.i]||0) + '%'; });
+  }, 60);
+}
+
+function usePhone(){
+  if(used.phone) return; used.phone=true;
+  document.getElementById('ll-phone').classList.add('used');
+  stopSound(activeThinking);
+  playSound('phone');
+  const q = QUESTIONS[current];
+  const ft = document.getElementById('friendText');
+  ft.innerHTML = 'Соединяем…';
+  openModal('phoneModal');
+  clearTimeout(window._friendTimer);
+  window._friendTimer = setTimeout(()=>{
+    ft.innerHTML = '<b>Михаил:</b> «Я уверен на все сто! Правильный ответ — <b>' +
+      LETTERS[q.correct] + ': ' + q.a[q.correct] + '</b>»';
+    friendAnsweredFor = current;
+  }, 1800);
+}
+function closePhone(){
+  stopSound('phone');
+  if(!locked) playSound(activeThinking, true);
+  closeModal('phoneModal');
+  if(friendAnsweredFor === current && explainShownFor !== current){
+    setTimeout(openExplain, 350);
+  }
+}
+
+/* Экран голосующего зрителя */
+function initVoter(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('voter').classList.add('active');
+  const status = document.getElementById('voterStatus');
+  const optsBox = document.getElementById('voterOptions');
+  if(!firebaseReady){ status.textContent = 'Голосование недоступно: сервер не настроен.'; return; }
+
+  db.ref('poll').on('value', snap=>{
+    const p = snap.val();
+    optsBox.innerHTML = '';
+    if(!p || !p.active){ status.textContent = 'Голосование ещё не началось. Ожидайте…'; return; }
+    const voted = !!localStorage.getItem('mnm_voted_'+p.round);
+    status.textContent = voted ? 'Ваш голос учтён ✓' : 'Выберите вариант ответа';
+    const options = Array.isArray(p.options) ? p.options : Object.values(p.options||{});
+    options.forEach(o=>{
+      const el = document.createElement('div');
+      el.className = 'answer' + (voted ? ' locked' : '');
+      el.innerHTML = `<div class="answer-inner"><span class="letter">${o.letter}</span><span class="text">${o.text}</span></div>`;
+      if(!voted) el.onclick = ()=>castVote(o.i, p.round, status, optsBox);
+      optsBox.appendChild(el);
+    });
+  });
+}
+
+function castVote(i, round, status, optsBox){
+  const key = 'mnm_voted_'+round;
+  if(localStorage.getItem(key)) return;
+  localStorage.setItem(key,'1');
+  db.ref('poll/votes/'+i).transaction(v => (v||0)+1);
+  status.textContent = 'Спасибо! Ваш голос принят ✓';
+  optsBox.querySelectorAll('.answer').forEach(a=>a.classList.add('locked'));
+}
+
+function openModal(id){ document.getElementById(id).classList.add('show'); }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+
+/* ---- Индикатор прогресса ---- */
+function renderProgress(){
+  const box = document.getElementById('progress');
+  box.innerHTML = "";
+  for(let i=0;i<QUESTIONS.length;i++){
+    const d = document.createElement('span');
+    d.className = "dot" + (i<current ? " done" : i===current ? " active" : "");
+    box.appendChild(d);
+  }
+}
+
+/* ---- Финал ---- */
+function finish(){
+  stopAllSounds();
+  const total = QUESTIONS.length;
+
+  let icon, title, msg;
+  if(score <= 3){
+    icon = "🌱";
+    title = "Юный смысловик";
+    msg = "Ты только входишь в поле смыслов — но искра уже есть! Ценности МНМ ещё перешёптываются где-то рядом. Пересмотри карточки, и в следующий раз — уверенно станешь Магистром! 💪";
+  }else if(score <= 6){
+    icon = "🎓";
+    title = "Носитель смыслов";
+    msg = "Крепкий уровень! Ты уже говоришь на языке ценностей и понимаешь, что к чему. Ещё чуть-чуть насмотренности — и звание магистра твоё 🎓.";
+  }else{
+    icon = "🎩";
+    title = "Магистр ценностей";
+    msg = "Топчик! Ты не просто знаешь ценности МНМ — ты ими живёшь. Можно смело идти преподавать остальным. Снимаем шляпу. 🎩";
+  }
+
+  document.getElementById('resultIcon').textContent = icon;
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultSum').textContent = score + " / " + total;
+  document.getElementById('resultMsg').textContent = msg;
+  show('result');
+  playSound('win');
+}
+
+/* ---- Маршрутизация: зритель-голосующий или обычная игра ---- */
+if(IS_VOTER){
+  initVoter();
+}else{
+  // музыка заставки: пробуем сразу; если браузер заблокировал автозапуск — по первому касанию
+  playSound('intro', true);
+  document.addEventListener('pointerdown', function(){
+    const a = _audio['intro'];
+    if(document.getElementById('start').classList.contains('active') && (!a || a.paused)){
+      playSound('intro', true);
+    }
+  }, { once:true });
+}
+</script>
+</body>
+</html>
